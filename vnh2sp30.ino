@@ -39,6 +39,7 @@ int K_right = 0; // analog RIGHT multiplier.
 int K_left = 0; // analog LEFT multiplier.
 int KK_right = 0; // analog RIGHT Wheeel Corrected Value.
 int KK_left = 0; // analog LEFT Wheel corrrected Value.
+
 void setup() 
 {
 stop (); //stop rutine.
@@ -62,125 +63,125 @@ Serial.begin (9600);
 
 void loop() 
 { 
-//--------------- LR routin ---------------
-potValue_NS = analogRead (potPin_NS);
-potValue_LR = analogRead (potPin_LR); 
+  //--------------- LR routin ---------------
+  potValue_NS = analogRead (potPin_NS);
+  potValue_LR = analogRead (potPin_LR); 
 
-if ((potValue_NS >=501 && potValue_NS <=520)&&(potValue_LR >=501 && potValue_LR <=520)) //dead band of potentiometers at center.
-
-{
-stop(); //start "stop" routine.
-delay (50); //delat 50mSec. for soft break.
-BREAK (); // "break" both motors.
-}
-
-if (potValue_LR <=500) // JoyStick LEFT Shifted. LEFT=0<<======|500-520|-------1024=RIGHT
-{
-K_right = map (potValue_LR, 500, 385, 0, 180); // set right motor potentiometer value from 500-385 to 0-220 accordinglly.
-}
-
-if (potValue_LR >=521) // JoyStic RIGHT shifted. LEFT=0--------|500-520|=======>>1024=RIGHT
-{
-K_left=map (potValue_LR, 521, 640, 0, 180); // set right motor potentiometer value from 500-385 to 0-220 accordinglly.
-}
-
-// --------------- OPERATION routin ---------------
-if (potValue_NS >=521) // 520|=====>>1024=FORWARD
-{
-FORWARD();
-}
-
-if (potValue_NS <=500) // REVERSE = 0<<=====501
-{
-REVERSE ();
-}
-//Serial.println ("L/R potValue:");
-//Serial.println (potPin_NS);
-//delay (100);
-// Serial.println ("LEFT WHEEL:");
-Serial.println (Left_Wheel_Pin);
-// delay (100);
+  if ((potValue_NS >=501 && potValue_NS <=520)&&(potValue_LR >=501 && potValue_LR <=520)) //dead band of potentiometers at center.
+  {
+    stop(); //start "stop" routine.
+    delay (50); //delat 50mSec. for soft break.
+    BREAK (); // "break" both motors.
+  }
+  
+  if (potValue_LR <=500) // JoyStick LEFT Shifted. LEFT=0<<======|500-520|-------1024=RIGHT
+  {
+    K_right = map (potValue_LR, 500, 385, 0, 180); // set right motor potentiometer value from 500-385 to 0-220 accordinglly.
+  }
+  
+  if (potValue_LR >=521) // JoyStic RIGHT shifted. LEFT=0--------|500-520|=======>>1024=RIGHT
+  {
+    K_left=map (potValue_LR, 521, 640, 0, 180); // set right motor potentiometer value from 500-385 to 0-220 accordinglly.
+  }
+  
+  // --------------- OPERATION routin ---------------
+  if (potValue_NS >=521) // 520|=====>>1024=FORWARD
+  {
+    FORWARD();
+  }
+  
+  if (potValue_NS <=500) // REVERSE = 0<<=====501
+  {
+    REVERSE ();
+  }
+    //Serial.println ("L/R potValue:");
+    //Serial.println (potPin_NS);
+    //delay (100);
+    // Serial.println ("LEFT WHEEL:");
+    Serial.println (Left_Wheel_Pin);
+    // delay (100);
 }
 
 void stop()
 {
-analogWrite (Right_Wheel_Value, 0); //pwm out pin 5
-analogWrite (Left_Wheel_Value, 0); //pwm out pin 9 
+  analogWrite (Right_Wheel_Value, 0); //pwm out pin 5
+  analogWrite (Left_Wheel_Value, 0); //pwm out pin 9 
 }
-
+  
 void FORWARD ()
 {
-digitalWrite (dir_Right_A1, HIGH); //FORWARD right wheel
-digitalWrite (dir_Right_B1, LOW); //FORWARD right wheel
-digitalWrite (dir_Left_A2, LOW); //FORWARD left wheel
-digitalWrite (dir_Left_B2, HIGH); //FORWARD left wheel 
-
-Right_Wheel_Value=map (potValue_NS, 521, 645, 0, 254); 
-Left_Wheel_Value =map (potValue_NS, 521, 645, 0, 254);
-
-KK_right = (Right_Wheel_Value - K_right); // Right wheel forward-command - (minus) stick right-command for turning.
-
-if (KK_right < 0) // combind, calculated value for wheel.
-{
-analogWrite (Right_Wheel_Pin, 0);
+  digitalWrite (dir_Right_A1, HIGH); //FORWARD right wheel
+  digitalWrite (dir_Right_B1, LOW); //FORWARD right wheel
+  digitalWrite (dir_Left_A2, LOW); //FORWARD left wheel
+  digitalWrite (dir_Left_B2, HIGH); //FORWARD left wheel 
+  
+  Right_Wheel_Value=map (potValue_NS, 521, 645, 0, 254); 
+  Left_Wheel_Value =map (potValue_NS, 521, 645, 0, 254);
+  
+  KK_right = (Right_Wheel_Value - K_right); // Right wheel forward-command - (minus) stick right-command for turning.
+  
+  if (KK_right < 0) // combind, calculated value for wheel.
+  {
+    analogWrite (Right_Wheel_Pin, 0);
+  }
+  else 
+  {
+    analogWrite( Right_Wheel_Pin , KK_right);
+  } 
+  
+  KK_left = (Left_Wheel_Value - K_left);
+  
+  if (KK_left < 0)
+  {
+    analogWrite (Left_Wheel_Pin, 0);
+  }
+  
+  else 
+  {
+  analogWrite( Left_Wheel_Pin, KK_left);
+  } 
 }
-else 
-{
-analogWrite( Right_Wheel_Pin , KK_right);
-} 
-
-KK_left = (Left_Wheel_Value - K_left);
-
-if (KK_left < 0)
-{
-analogWrite (Left_Wheel_Pin, 0);
-}
-
-else 
-{
-analogWrite( Left_Wheel_Pin, KK_left);
-} 
-}
-
-
+  
+  
 void REVERSE()
 {
-digitalWrite (dir_Right_A1, LOW); //REVERSE right wheel
-digitalWrite (dir_Right_B1, HIGH); //REVERSE right wheel
-digitalWrite (dir_Left_A2, HIGH); //REVERSE left wheel
-digitalWrite (dir_Left_B2, LOW); //REVERSE left wheel
-
-Right_Wheel_Value=map (potValue_NS, 500, 370, 0, 254);
-Left_Wheel_Value =map (potValue_NS, 500, 370, 0, 254);
-
-KK_right = Right_Wheel_Value - K_right; 
-if (KK_right <0)
-{
-analogWrite (Right_Wheel_Pin, 0);
-} 
-
-else {
-analogWrite( Right_Wheel_Pin , KK_right);
-}
-
-KK_left =(Left_Wheel_Value - K_left);
-
-if (KK_left < 0)
-{
-analogWrite (Left_Wheel_Pin, 0);
-}
-
-else 
-{
-analogWrite (Left_Wheel_Pin, KK_left);
-}
+  digitalWrite (dir_Right_A1, LOW); //REVERSE right wheel
+  digitalWrite (dir_Right_B1, HIGH); //REVERSE right wheel
+  digitalWrite (dir_Left_A2, HIGH); //REVERSE left wheel
+  digitalWrite (dir_Left_B2, LOW); //REVERSE left wheel
+  
+  Right_Wheel_Value=map (potValue_NS, 500, 370, 0, 254);
+  Left_Wheel_Value =map (potValue_NS, 500, 370, 0, 254);
+  
+  KK_right = Right_Wheel_Value - K_right; 
+  
+  if (KK_right <0)
+  {
+    analogWrite (Right_Wheel_Pin, 0);
+  } 
+  
+  else {
+    analogWrite( Right_Wheel_Pin , KK_right);
+  }
+  
+  KK_left =(Left_Wheel_Value - K_left);
+  
+  if (KK_left < 0)
+  {
+    analogWrite (Left_Wheel_Pin, 0);
+  }
+  
+  else 
+  {
+  analogWrite (Left_Wheel_Pin, KK_left);
+  }
 }
 
 
 void BREAK ()
 {
-digitalWrite (dir_Right_A1, LOW); //Break right wheel
-digitalWrite (dir_Right_B1, LOW); //Break right wheel
-digitalWrite (dir_Left_A2, LOW); //Break left wheel
-digitalWrite (dir_Left_B2, LOW); //Break left wheel 
-}﻿
+  digitalWrite (dir_Right_A1, LOW); //Break right wheel
+  digitalWrite (dir_Right_B1, LOW); //Break right wheel
+  digitalWrite (dir_Left_A2, LOW); //Break left wheel
+  digitalWrite (dir_Left_B2, LOW); //Break left wheel 
+}
